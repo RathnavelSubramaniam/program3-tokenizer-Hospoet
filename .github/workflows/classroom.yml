@@ -1,0 +1,35 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: practical3
+      id: practical3
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: practical3
+        setup-command: 'javac practical3.java '
+        command: java practical3
+        input: The Brown fox jumped over the lazy dog, Bob baked delicious cake
+        expected-output: |-
+          Words starting with 'b': [Brown, Bob, baked]
+          Words ending with 'ED': [jumped, baked]
+        comparison-method: contains
+        timeout: 10
+        max-score: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        PRACTICAL3_RESULTS: "${{steps.practical3.outputs.result}}"
+      with:
+        runners: practical3
